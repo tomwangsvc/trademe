@@ -23,11 +23,11 @@ type Properties []Property
 
 func (properties Properties) Print() string {
 	tmp := struct {
-		Properties Properties `json:"properties,omitempty"`
 		Length     int        `json:"length,omitempty"`
+		Properties Properties `json:"properties,omitempty"`
 	}{
-		properties,
 		len(properties),
+		properties,
 	}
 
 	bytes, _ := json.MarshalIndent(tmp, "\t\t", "\t")
