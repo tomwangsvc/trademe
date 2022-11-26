@@ -19,13 +19,10 @@ type logger interface {
 }
 
 func LogInfo(prefix string, args ...interface{}) {
-	argsLog := ""
-	for _, arg := range args {
+	for i, arg := range args {
 		if logger, ok := arg.(logger); ok {
-			argsLog += logger.Print()
-		} else {
-			argsLog += fmt.Sprintf("%+v", arg)
+			args[i] = logger.Print()
 		}
 	}
-	log.Println(fmt.Sprintf(prefix, argsLog))
+	log.Println(fmt.Sprintf(prefix, args...))
 }

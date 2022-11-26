@@ -6,17 +6,24 @@ go fmt trademe/... && go build -o ./bin/trademe ./cmd
 
 # run service
 ```
-./bin/trademe test1
+./bin/trademe -result=test1
 ```
 test1 result will show as default but subcommand can also support `test2` or `test3` or `test4` or `test5`
+
+when to show `test5` result, it can also support one more optional subcommand `-size=10`
+
+```
+./bin/trademe -result=test5 -size=10
+```
 
 # run service
 ```
  go test -timeout 5000ms -cover trademe/...
  ```
 
+# sample result 1 in Unix terminal
  ```
- 2022/11/26 03:41:10 properties initialised successfully with length 291
+2022/11/26 03:41:10 properties initialised successfully with length 291
 2022/11/26 03:41:10 result from test1: {
 			"length": 194,
 			"properties": [

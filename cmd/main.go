@@ -1,21 +1,19 @@
 package main
 
 import (
-	"fmt"
-	"os"
+	"flag"
 	"trademe/app"
 )
 
 func main() {
-	if len(os.Args) < 2 {
-		fmt.Println("expected 'test1' 'test2' 'test3' 'test4' 'test5' subcommands")
-		os.Exit(1)
-	}
+	chunkSize := flag.Int("size", 2, "chunk size to process data")
+	result := flag.String("result", "test1", "result shows test result")
+	flag.Parse()
 
 	properties := app.InitProperties("./files/properties.txt")
-	app.LogInfo("properties initialised successfully with length %+v", len(properties))
+	app.LogInfo("properties initialised successfully with length %d", len(properties))
 
-	switch os.Args[1] {
+	switch *result {
 	case "test1":
 		app.LogInfo("result from test1: %+v", app.FilterAndUseLastItem(properties))
 
@@ -29,6 +27,6 @@ func main() {
 		app.LogInfo("result from test4: %+v", app.FilterByMutipleConditions(properties))
 
 	case "test5":
-		app.LogInfo("result from test4: %+v", app.FilterByMutipleConditions(properties))
+		app.LogInfo("result from test5 by chunk size %d: %+v", *chunkSize, app.ProcessByChunk(properties, *chunkSize))
 	}
 }

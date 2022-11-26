@@ -3,8 +3,8 @@ package app
 import (
 	"bufio"
 	"encoding/json"
-	"fmt"
 	"log"
+	"math"
 	"os"
 	"strconv"
 	"strings"
@@ -23,11 +23,11 @@ type Properties []Property
 
 func (properties Properties) Print() string {
 	tmp := struct {
-		Length     int        `json:"length,omitempty"`
 		Properties Properties `json:"properties,omitempty"`
+		Length     int        `json:"length,omitempty"`
 	}{
-		len(properties),
 		properties,
+		len(properties),
 	}
 
 	bytes, _ := json.MarshalIndent(tmp, "\t\t", "\t")
@@ -202,8 +202,9 @@ func ProcessByChunk(properties []Property, chunkSize int) Properties {
 		return nil
 	}
 
+	// find out non duplicated properties
 	properties = FilterOutDuplicatedItem(properties)
-	var numOfPropertiesForOneRoutine = len(properties) / chunkSize
+	var numOfPropertiesForOneRoutine = int(math.Ceil(float64(len(properties)) / float64(chunkSize)))
 	if chunkSize > len(properties) {
 		numOfPropertiesForOneRoutine = 1
 		chunkSize = len(properties)
@@ -211,18 +212,22 @@ func ProcessByChunk(properties []Property, chunkSize int) Properties {
 
 	var result []Property
 	var wg sync.WaitGroup
+	var mu sync.Mutex
 	wg.Add(chunkSize)
 	for i := 0; i < chunkSize; i++ {
 		go func(i int) {
-			defer wg.Done()
+			defer func() {
+				wg.Done()
+			}()
 			beginIndex := i * numOfPropertiesForOneRoutine
 			endIndex := (i + 1) * numOfPropertiesForOneRoutine
 			if endIndex > len(properties) {
 				endIndex = len(properties)
 			}
-			fmt.Println(beginIndex, endIndex, numOfPropertiesForOneRoutine)
 			for property := range worker(properties[beginIndex:endIndex]) {
+				mu.Lock()
 				result = append(result, property)
+				mu.Unlock()
 			}
 		}(i)
 	}
@@ -239,5 +244,5 @@ func worker(properties []Property) (chanProperties chan Property) {
 		}
 		close(chanProperties)
 	}()
-	return chanProperties
+	return
 }
